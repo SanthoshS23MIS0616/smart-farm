@@ -575,7 +575,8 @@ def ask_assistant(request: AssistantAskRequest) -> dict:
 @router.post("/assistant/upload")
 async def upload_assistant_attachment(
     file: UploadFile = File(...),
-    query: str = Form(default="Please analyze this attached crop leaf / farm image or document and give advisory.")
+    query: str = Form(default="Please analyze this attached crop leaf / farm image or document and give advisory."),
+    language: str = Form(default="en")
 ) -> dict:
     from backend.app.config import STATIC_DIR
     import uuid
@@ -597,7 +598,7 @@ async def upload_assistant_attachment(
     # Analyze image or document
     from backend.rag.assistant import answer_farmer_query
     prompt = f"[Attachment: {file.filename}] {query}. Provide actionable ICAR/TNAU diagnostic guidance."
-    res = answer_farmer_query(query=prompt, crop_name="", language="en")
+    res = answer_farmer_query(query=prompt, crop_name="", language=language)
     
     return {
         "status": "success",

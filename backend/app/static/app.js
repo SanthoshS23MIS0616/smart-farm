@@ -255,25 +255,90 @@ window.setLanguage = function(lang) {
   console.log(`Language switched to: ${lang}`);
 };
 
+// ── Common English -> Tamil transliteration/dictionary for voice reading ──
+const TA_VOICE_DICT = [
+  // Symbols & units
+  [/&amp;/gi, " மற்றும் "],
+  [/&/gi, " மற்றும் "],
+  [/%/gi, " சதவீதம் "],
+  [/₹/gi, " ரூபாய் "],
+  [/\//gi, " அல்லது "],
+  [/\bha\b/gi, " ஹெக்டேர் "],
+  [/\bkg\b/gi, " கிலோகிராம் "],
+  [/\bmm\b/gi, " மில்லிமீட்டர் "],
+  [/\bac\b/gi, " ஏக்கர் "],
+  [/\bacres?\b/gi, " ஏக்கர் "],
+  [/\bt\/ha\b/gi, " டன் ஒரு ஹெக்டேருக்கு "],
+  
+  // Crops
+  [/\bblackgram\b/gi, " உளுந்து "],
+  [/\brice\b/gi, " நெல் "],
+  [/\bpaddy\b/gi, " நெல் "],
+  [/\bcotton\b/gi, " பருத்தி "],
+  [/\bmaize\b/gi, " சோளம் "],
+  [/\bsugarcane\b/gi, " கரும்பு "],
+  [/\bwheat\b/gi, " கோதுமை "],
+  [/\bchickpea\b/gi, " கொண்டைக்கடலை "],
+  [/\bgroundnut\b/gi, " நிலக்கடலை "],
+  [/\bpigeonpea\b/gi, " துவரை "],
+  [/\bbanana\b/gi, " வாழை "],
+  [/\bcoconut\b/gi, " தென்னை "],
+  [/\bpapaya\b/gi, " பப்பாளி "],
+  [/\bcoffee\b/gi, " காப்பி "],
+  [/\bjute\b/gi, " சணல் "],
+  [/\blentil\b/gi, " பருப்பு "],
+  [/\bmungbean\b/gi, " பாசிப்பயறு "],
+  [/\bwatermelon\b/gi, " தர்பூசணி "],
+  [/\bmuskmelon\b/gi, " முலாம்பழம் "],
+  [/\bapple\b/gi, " ஆப்பிள் "],
+  [/\borange\b/gi, " ஆரஞ்சு "],
+  [/\bpomegranate\b/gi, " மாதுளை "],
+  [/\bgrapes\b/gi, " திராட்சை "],
+  [/\bmango\b/gi, " மாம்பழம் "],
+
+  // Agronomic terms
+  [/\bfertilizer\b/gi, " உரம் "],
+  [/\burea\b/gi, " யூரியா "],
+  [/\bdap\b/gi, " டிஏபி உரம் "],
+  [/\bmop\b/gi, " பொட்டாஷ் உரம் "],
+  [/\bnitrogen\b/gi, " தழைச்சத்து "],
+  [/\bphosphorus\b/gi, " மணிச்சத்து "],
+  [/\bpotassium\b/gi, " சாம்பல் சத்து "],
+  [/\birrigation\b/gi, " பாசனம் "],
+  [/\bwater\b/gi, " தண்ணீர் "],
+  [/\bpest\b/gi, " பூச்சி "],
+  [/\bdisease\b/gi, " நோய் "],
+  [/\byield\b/gi, " மகசூல் "],
+  [/\bprofit\b/gi, " இலாபம் "],
+  [/\bsowing\b/gi, " விதைப்பு "],
+  [/\bharvest\b/gi, " அறுவடை "],
+  [/\bmonths?\b/gi, " மாதங்கள் "],
+  [/\bdays?\b/gi, " நாட்கள் "],
+  [/\bborewell\b/gi, " ஆழ்துளை கிணறு "],
+  [/\bcanal\b/gi, " கால்வாய் "],
+  [/\bdrip\b/gi, " சொட்டு நீர் "],
+  [/\bsprinkler\b/gi, " தெளிப்பு நீர் "],
+  [/\brain-?fed\b/gi, " மானாவாரி "],
+  [/\bseed\b/gi, " விதை "],
+  [/\bweed\b/gi, " களை "],
+  [/\bspray\b/gi, " தெளித்தல் "]
+];
+
 // // ── Point 4: Slow, Clear Tamil Voice Synthesis (fully fixed) ────────────────
 window.speakText = function(text) {
   if (!("speechSynthesis" in window) || !text) return;
   try {
     window.speechSynthesis.cancel();
-    let cleanText = text.replace(/[*#_`]/g, "").slice(0, 400);
+    let cleanText = text.replace(/[*#_`]/g, "").slice(0, 500);
 
     if (currentLanguage === "ta") {
-      // Replace symbols/English that would cause device to fall back to English voice
-      cleanText = cleanText
-        .replace(/&amp;/g, " மற்றும் ")
-        .replace(/&/g, " மற்றும் ")
-        .replace(/%/g, " சதவீதம் ")
-        .replace(/₹/g, " ரூபாய் ")
-        .replace(/\//g, " அல்லது ")
-        .replace(/\bha\b/g, " ஹெக்டேர் ")
-        .replace(/\bkg\b/g, " கிலோகிராம் ")
-        .replace(/\bmm\b/g, " மில்லிமீட்டர் ")
-        .replace(/[a-zA-Z]+/g, " "); // Strip remaining English letters
+      // 1. Translate well-known English agricultural terms and crop names to Tamil
+      for (const [pattern, replacement] of TA_VOICE_DICT) {
+        cleanText = cleanText.replace(pattern, replacement);
+      }
+
+      // 2. Clean up punctuation and remaining stray English words
+      cleanText = cleanText.replace(/[a-zA-Z]+/g, " ");
       cleanText = cleanText.replace(/\s+/g, " ").trim();
     }
 
@@ -655,6 +720,12 @@ function renderResults(result) {
   if (rejEl && result.rejected_crops) {
     rejEl.innerHTML = result.rejected_crops.slice(0, 4).map(r => `<div>• <strong>${r.crop}</strong>: ${r.reason}</div>`).join("");
   }
+
+  // Voice announcement of the recommendation
+  const recMsg = currentLanguage === "ta"
+    ? `உங்கள் நிலத்திற்கு மிகவும் பரிந்துரைக்கப்படும் பயிர் ${best.crop}. பொருத்த விகிதம் ${((best.suitability_pct || (best.final_score * 100))).toFixed(0)} சதவீதம்.`
+    : `Recommended best crop for your field is ${best.crop} with match score of ${((best.suitability_pct || (best.final_score * 100))).toFixed(0)} percent.`;
+  window.speakText(recMsg);
 }
 
 // ── Point 5: Sowing Schedule Generation & Task Checklist ────────────────────
@@ -776,7 +847,16 @@ window.toggleTaskDone = async function(planId, taskId, isDone) {
   try {
     const card = document.getElementById(`task-card-${taskId}`);
     if (card) card.classList.toggle("completed", isDone);
-    setStatus(`Task updated: ${isDone ? "Done ✓" : "Pending"}`);
+    const statusTxt = isDone ? (currentLanguage === "ta" ? "பணி நிறைவடைந்தது ✓" : "Task completed ✓") : (currentLanguage === "ta" ? "பணி நிலுவையில் உள்ளது" : "Task pending");
+    setStatus(statusTxt);
+
+    if (isDone) {
+      const taskTitle = card ? card.querySelector("h4")?.textContent || "பணி" : "பணி";
+      const ttsMsg = currentLanguage === "ta"
+        ? `${taskTitle} பணி முடிந்தது என பதிவு செய்யப்பட்டது.`
+        : `Task recorded as completed.`;
+      window.speakText(ttsMsg);
+    }
 
     await fetch("/api/plan/task/confirm", {
       method: "POST",
@@ -845,6 +925,7 @@ window.askAssistant = async function(queryText, attachmentFile = null) {
       const formData = new FormData();
       formData.append("file", attachmentFile);
       formData.append("query", q || "Diagnose this crop leaf / farm photo.");
+      formData.append("language", currentLanguage);
 
       const resp = await fetch("/api/assistant/upload", {
         method: "POST",

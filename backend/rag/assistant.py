@@ -139,7 +139,15 @@ def _call_gemini_llm(system_prompt: str, user_prompt: str) -> str | None:
     if not api_key:
         return None
 
-    models_to_try = ["gemini-3.6-flash", "gemini-1.5-flash-latest", "gemini-1.5-flash", "gemini-2.0-flash", "gemini-1.5-pro"]
+    models_to_try = [
+        "gemini-2.5-flash",
+        "gemini-flash-latest",
+        "gemini-2.5-pro",
+        "gemini-2.5-flash-lite",
+        "gemini-1.5-flash",
+        "gemini-2.0-flash",
+        "gemini-1.5-pro",
+    ]
     prompt_combined = system_prompt + "\n\n" + user_prompt
     payload = {
         "contents": [{"parts": [{"text": prompt_combined}]}],
@@ -219,21 +227,28 @@ def answer_farmer_query(
 
     user_prompt = f"Verified Agricultural Context:\n{context_text}\n\n{farmer_notes}\n\nFarmer Question: {query}"
 
-    # 1. Primary Model: OpenAI gpt-5.6-luna (with Rate Limiting & Quota Control)
-    llm_answer = _call_openai_llm(system_prompt, user_prompt)
+    # Try LLMs in order of availability:
+    # 1. Gemini (primary working provider)
+    llm_answer = _call_gemini_llm(system_prompt, user_prompt)
 
-    # 2. Secondary Fallback: Groq (Llama-3.3-70B)
+    # 2. OpenAI
+    if not llm_answer:
+        llm_answer = _call_openai_llm(system_prompt, user_prompt)
+
+    # 3. Groq
     if not llm_answer:
         llm_answer = _call_groq_llm(system_prompt, user_prompt)
-
-    # 3. Tertiary Fallback: Google Gemini
-    if not llm_answer:
-        llm_answer = _call_gemini_llm(system_prompt, user_prompt)
 
     # 4. Quaternary Grounded Passage Fallback
     if not llm_answer:
         primary = passages[0]
-        llm_answer = f"**{primary['title']}**\n\n{primary['text']}"
+        if is_ta:
+            # If fallback is needed in Tamil mode, prompt a quick translation or provide Tamil advisory
+            trans_prompt = f"Translate and summarize the following agricultural guidance purely in natural Tamil for an Indian farmer:\n\n{primary['text']}"
+            translated = _call_gemini_llm("You are a helpful Tamil agricultural translator. Provide ONLY Tamil output.", trans_prompt)
+            llm_answer = translated if translated else f"**{primary.get('crop', '')} வேளாண்மை வழிகாட்டுதல்:**\n{primary['text']}"
+        else:
+            llm_answer = f"**{primary['title']}**\n\n{primary['text']}"
 
     disclaimer = SAFETY_DISCLAIMER_TA if is_ta else SAFETY_DISCLAIMER_EN
 
