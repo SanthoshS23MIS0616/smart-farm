@@ -1,0 +1,99 @@
+from __future__ import annotations
+
+from typing import Literal, Optional
+
+from pydantic import BaseModel, Field
+
+# Valid irrigation sources accepted by the engine
+IrrigationSource = Literal["rain_fed", "canal", "borewell", "drip", "sprinkler"]
+
+
+class PredictionInput(BaseModel):
+    nitrogen: Optional[float] = Field(default=None, ge=0)
+    phosphorous: Optional[float] = Field(default=None, ge=0)
+    potassium: Optional[float] = Field(default=None, ge=0)
+    ph: Optional[float] = Field(default=None, ge=0)
+    temperature_c: Optional[float] = None
+    humidity: Optional[float] = Field(default=None, ge=0)
+    rainfall_mm: Optional[float] = Field(default=None, ge=0)
+    moisture: Optional[float] = Field(default=None, ge=0)
+    area: Optional[float] = Field(default=None, gt=0)
+    price_per_ton: Optional[float] = Field(default=None, ge=0)
+    season: Optional[str] = None
+    state_name: Optional[str] = None
+    district_name: Optional[str] = None
+    latitude: Optional[float] = Field(default=None, ge=6.0, le=38.5)
+    longitude: Optional[float] = Field(default=None, ge=68.0, le=98.0)
+    crop_year: Optional[int] = Field(default=None, ge=1990, le=2100)
+    top_k: int = Field(default=3, ge=1, le=10)
+    # Context fields
+    previous_crop: Optional[str] = Field(
+        default=None,
+        description="Crop grown last season. Used to penalise mono-cropping.",
+    )
+    irrigation_source: Optional[IrrigationSource] = Field(
+        default=None,
+        description="Primary water source. Rain-fed farms get penalty for high-water crops.",
+    )
+    soil_type: Optional[str] = Field(
+        default=None,
+        description="Soil type preset (alluvial / black_cotton / red_laterite / sandy_loam / clay).",
+    )
+
+
+class TrainRequest(BaseModel):
+    data_dir: Optional[str] = None
+
+
+class SendOTPRequest(BaseModel):
+    phone_number: str = Field(..., description="Farmer mobile number with country code")
+
+
+class VerifyOTPRequest(BaseModel):
+    phone_number: str
+    otp_code: str
+    full_name: Optional[str] = "Farmer"
+
+
+class GoogleAuthRequest(BaseModel):
+    phone_number: Optional[str] = None
+    email: Optional[str] = None
+    full_name: Optional[str] = "Farmer"
+    google_token: Optional[str] = None
+
+
+class PlanGenerateRequest(BaseModel):
+    crop_name: str
+    sowing_date: Optional[str] = None
+    area_acres: float = Field(default=1.0, gt=0)
+    farmer_budget_inr: float = Field(default=50000.0, ge=0)
+    irrigation_source: str = "Borewell"
+    farmer_phone: Optional[str] = None
+    farmer_name: Optional[str] = "Farmer"
+
+
+class TaskConfirmRequest(BaseModel):
+    plan_id: str
+    task_id: str
+    is_completed: bool = True
+
+
+class PlanRecheckRequest(BaseModel):
+    plan_id: Optional[str] = None
+    plan: Optional[dict] = None
+    weather: Optional[dict] = None
+
+
+class AssistantAskRequest(BaseModel):
+    query: str
+    crop_name: Optional[str] = None
+    farmer_context: Optional[dict] = None
+    language: Optional[str] = None
+
+
+class SoilEstimateRequest(BaseModel):
+    latitude: float = Field(..., ge=6.0, le=38.5)
+    longitude: float = Field(..., ge=68.0, le=98.0)
+    district: Optional[str] = None
+    state: Optional[str] = None
+

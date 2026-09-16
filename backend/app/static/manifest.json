@@ -1,0 +1,55 @@
+{
+  "name": "CropAI - Smart Farming Platform",
+  "short_name": "CropAI",
+  "description": "AI-powered crop recommendation, real-time agronomic analytics, automated sowing schedules, and farm management advisory for Indian farmers.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f8fafc",
+  "theme_color": "#16a34a",
+  "icons": [
+    {
+      "src": "/static/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/static/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/static/icons/icon-maskable-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/static/icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "categories": ["agriculture", "productivity", "utilities"],
+  "shortcuts": [
+    {
+      "name": "Crop Recommendation",
+      "url": "/#home",
+      "description": "Get AI crop recommendation for your soil"
+    },
+    {
+      "name": "Sowing Schedule",
+      "url": "/#schedule",
+      "description": "View your active crop management plan"
+    },
+    {
+      "name": "Ask SmartFarm AI",
+      "url": "/#chat",
+      "description": "Chat with ICAR/TNAU AI agronomist"
+    }
+  ]
+}

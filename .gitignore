@@ -1,0 +1,32 @@
+# Environment variables & secrets (CRITICAL: NEVER COMMIT)
+.env
+.env.*
+*.env
+!.env.example
+
+# Python cache & artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+catboost_info/
+
+# Virtual environments
+venv/
+env/
+.venv/
+
+# Temporary logs & process IDs
+uvicorn_pid.txt
+tmp_run_*.txt
+*.log
+
+# Database files
+*.sqlite3
+*.db
+!data/smartfarm_plans.db
+
+# OS specific files
+.DS_Store
+Thumbs.db
