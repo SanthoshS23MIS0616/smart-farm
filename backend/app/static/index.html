@@ -6,13 +6,15 @@
     <title>CropAI — Smart Farming Platform</title>
     <meta name="description" content="AI-powered crop recommendation, yield prediction, dated sowing plans, and farm economics for Indian farmers." />
     
-    <!-- PWA Meta Tags -->
+    <!-- PWA Meta Tags & Icons -->
     <link rel="manifest" href="/manifest.json" />
     <meta name="theme-color" content="#16a34a" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="CropAI" />
+    <link rel="icon" type="image/png" sizes="64x64" href="/static/icons/favicon.png" />
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico" />
     <link rel="apple-touch-icon" href="/static/icons/icon-192.png" />
     
     <!-- Fonts & Libraries -->
@@ -21,7 +23,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css" />
-    <link rel="stylesheet" href="/static/styles.css?v=20260916-pwa-v3" />
+    <link rel="stylesheet" href="/static/styles.css?v=20260916-pwa-v4" />
     
     <!-- Chart.js & jsPDF for analytics and reports -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
@@ -35,7 +37,7 @@
       <!-- ── Desktop Left Sidebar (Visible on screens >= 1024px) ────────── -->
       <aside class="desktop-sidebar" id="desktop-sidebar">
         <div class="sidebar-brand">
-          <div class="sidebar-logo">🌿</div>
+          <img src="/static/icons/icon-192.png" alt="CropAI Icon" class="sidebar-logo-img" />
           <div class="sidebar-brand-text">
             <h2>CropAI</h2>
             <span data-i18n="brand_subtitle">Smart Farming Platform</span>
@@ -100,7 +102,7 @@
           <div class="header-left">
             <button type="button" id="chat-back-btn" class="header-back-btn" style="display:none" title="Back">←</button>
             <div class="header-brand">
-              <div class="brand-icon">🌿</div>
+              <img src="/static/icons/icon-192.png" alt="CropAI Icon" class="brand-logo-img" />
               <div class="brand-info">
                 <h1 class="brand-title">CropAI</h1>
                 <span class="brand-subtitle" data-i18n="brand_subtitle">Smart Farming Platform</span>
