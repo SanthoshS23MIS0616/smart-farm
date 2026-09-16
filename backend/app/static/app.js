@@ -255,26 +255,46 @@ window.setLanguage = function(lang) {
   console.log(`Language switched to: ${lang}`);
 };
 
-// ── Point 4: Slow, Clear Tamil Voice Synthesis ──────────────────────────────
+// // ── Point 4: Slow, Clear Tamil Voice Synthesis (fully fixed) ────────────────
 window.speakText = function(text) {
   if (!("speechSynthesis" in window) || !text) return;
   try {
     window.speechSynthesis.cancel();
-    const cleanText = text.replace(/[*#_`]/g, "").slice(0, 300);
+    let cleanText = text.replace(/[*#_`]/g, "").slice(0, 400);
+
+    if (currentLanguage === "ta") {
+      // Replace symbols/English that would cause device to fall back to English voice
+      cleanText = cleanText
+        .replace(/&amp;/g, " மற்றும் ")
+        .replace(/&/g, " மற்றும் ")
+        .replace(/%/g, " சதவீதம் ")
+        .replace(/₹/g, " ரூபாய் ")
+        .replace(/\//g, " அல்லது ")
+        .replace(/\bha\b/g, " ஹெக்டேர் ")
+        .replace(/\bkg\b/g, " கிலோகிராம் ")
+        .replace(/\bmm\b/g, " மில்லிமீட்டர் ")
+        .replace(/[a-zA-Z]+/g, " "); // Strip remaining English letters
+      cleanText = cleanText.replace(/\s+/g, " ").trim();
+    }
+
+    if (!cleanText) return;
     const utter = new SpeechSynthesisUtterance(cleanText);
 
     if (currentLanguage === "ta") {
       utter.lang = "ta-IN";
-      utter.rate = 0.82; // Little slow and clear for natural Tamil advisory
+      utter.rate = 0.82;
       utter.pitch = 1.0;
-
-      // Find best Tamil voice
-      const voices = window.speechSynthesis.getVoices();
-      const tamilVoice = voices.find(v => 
-        v.lang === "ta-IN" || v.lang.startsWith("ta") || 
-        v.name.toLowerCase().includes("tamil") || v.name.includes("தமிழ்")
-      );
-      if (tamilVoice) utter.voice = tamilVoice;
+      // Find Tamil voice — retry after voices load
+      const trySetVoice = () => {
+        const voices = window.speechSynthesis.getVoices();
+        const tamilVoice = voices.find(v =>
+          v.lang === "ta-IN" || v.lang.startsWith("ta") ||
+          v.name.toLowerCase().includes("tamil") || v.name.includes("தமிழ்")
+        );
+        if (tamilVoice) utter.voice = tamilVoice;
+      };
+      trySetVoice();
+      if (!utter.voice) window.speechSynthesis.onvoiceschanged = trySetVoice;
     } else {
       utter.lang = "en-IN";
       utter.rate = 0.95;
@@ -940,8 +960,8 @@ function getLoggedInUser() {
 }
 
 function updateProfileUI() {
-  const user = getLoggedInUser() || { full_name: "santhosh", phone_number: "+91 99945 25549" };
-  const initial = (user.full_name || "S").charAt(0).toUpperCase();
+  const user = getLoggedInUser() || { full_name: "Farmer", phone_number: "" };
+  const initial = (user.full_name || "F").charAt(0).toUpperCase();
 
   const hInit = document.getElementById("header-avatar-initial");
   if (hInit) hInit.textContent = initial;
@@ -950,20 +970,29 @@ function updateProfileUI() {
   const sAvatar = document.getElementById("settings-avatar");
   if (sAvatar) sAvatar.textContent = initial;
 
+  const displayName = user.full_name || "Farmer";
+  const displayPhone = user.phone_number || "";
+
   const mName = document.getElementById("menu-user-name");
-  if (mName) mName.textContent = user.full_name || "santhosh";
+  if (mName) mName.textContent = displayName;
   const mPhone = document.getElementById("menu-user-phone");
-  if (mPhone) mPhone.textContent = user.phone_number || "+91 99945 25549";
+  if (mPhone) mPhone.textContent = displayPhone;
 
   const dName = document.getElementById("d-farmer-name");
-  if (dName) dName.textContent = user.full_name || "santhosh";
+  if (dName) dName.textContent = displayName;
   const dPhone = document.getElementById("d-farmer-phone");
-  if (dPhone) dPhone.textContent = user.phone_number || "+91 99945 25549";
+  if (dPhone) dPhone.textContent = displayPhone;
 
   const sName = document.getElementById("settings-name-display");
-  if (sName) sName.textContent = user.full_name || "santhosh";
+  if (sName) sName.textContent = displayName;
   const sPhone = document.getElementById("settings-contact-display");
-  if (sPhone) sPhone.textContent = user.phone_number || "+91 99945 25549";
+  if (sPhone) sPhone.textContent = displayPhone;
+
+  // Update input fields in settings
+  const nameInput = document.getElementById("set-farmer-name");
+  if (nameInput && user.full_name && user.full_name !== "Farmer") nameInput.value = user.full_name;
+  const phoneInput = document.getElementById("set-farmer-phone");
+  if (phoneInput && user.phone_number) phoneInput.value = user.phone_number;
 }
 
 function handleLogout() {
@@ -1074,11 +1103,12 @@ function setupAuthHandlers() {
   });
 
   document.getElementById("google-signin-btn")?.addEventListener("click", () => {
-    const user = { phone_number: "+91 99945 25549", full_name: "santhosh", auth_provider: "google" };
+    // Google auth - saves session without hardcoded number
+    const user = { phone_number: "", full_name: "Farmer", auth_provider: "google" };
     localStorage.setItem("cropai_user", JSON.stringify(user));
     updateProfileUI();
     document.getElementById("auth-modal")?.classList.add("hidden");
-    setStatus("✓ Signed in via Google!");
+    setStatus("✓ Signed in via Google! Update your phone in Settings for alerts.");
     if (window.pendingCropName) {
       executeCommit(window.pendingCropName, user.phone_number, user.full_name);
       window.pendingCropName = null;
@@ -1227,6 +1257,23 @@ document.addEventListener("DOMContentLoaded", () => {
   setupAuthHandlers();
   updateProfileUI();
   window.setLanguage(currentLanguage);
+
+  // Auto-geolocate on startup: fetches live soil/climate for user's real location
+  if ("geolocation" in navigator) {
+    navigator.geolocation.getCurrentPosition(
+      pos => {
+        const lat = Number(pos.coords.latitude.toFixed(5));
+        const lng = Number(pos.coords.longitude.toFixed(5));
+        map.setView([lat, lng], 14);
+        updateMapLocation(lat, lng);
+      },
+      () => {
+        // Silent fail - keep default India center
+        console.log("Geolocation denied, using default center.");
+      },
+      { timeout: 8000, maximumAge: 60000 }
+    );
+  }
 
   console.log("CropAI PWA Platform fully initialized.");
 });

@@ -21,7 +21,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css" />
-    <link rel="stylesheet" href="/static/styles.css?v=20260916-pwa-v2" />
+    <link rel="stylesheet" href="/static/styles.css?v=20260916-pwa-v3" />
     
     <!-- Chart.js & jsPDF for analytics and reports -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
@@ -84,8 +84,8 @@
           <div class="sidebar-user-card" id="sidebar-user-card">
             <div class="sidebar-user-avatar" id="d-avatar-initial">S</div>
             <div class="sidebar-user-info">
-              <strong id="d-farmer-name">santhosh</strong>
-              <span id="d-farmer-phone">+91 99945 25549</span>
+              <strong id="d-farmer-name">Farmer</strong>
+              <span id="d-farmer-phone"></span>
             </div>
             <button type="button" class="sidebar-logout-btn" id="d-logout-btn" title="Logout">🚪</button>
           </div>
@@ -122,8 +122,8 @@
               </button>
               <div class="profile-menu hidden" id="profile-dropdown-menu">
                 <div class="profile-menu-header">
-                  <strong id="menu-user-name">santhosh</strong>
-                  <span id="menu-user-phone">+91 99945 25549</span>
+                  <strong id="menu-user-name">Farmer</strong>
+                  <span id="menu-user-phone"></span>
                 </div>
                 <button type="button" class="profile-menu-item" id="menu-settings-btn">
                   <span>⚙️</span> <span data-i18n="nav_settings">Settings</span>
@@ -500,25 +500,25 @@
               </div>
 
               <div class="profile-header-tile">
-                <div class="profile-avatar-circle" id="settings-avatar">S</div>
+                <div class="profile-avatar-circle" id="settings-avatar">F</div>
                 <div>
-                  <strong id="settings-name-display" style="font-size:1.05rem;color:#0f172a;display:block">santhosh</strong>
-                  <span id="settings-contact-display" style="font-size:0.84rem;color:#64748b">+91 99945 25549</span>
+                  <strong id="settings-name-display" style="font-size:1.05rem;color:#0f172a;display:block">Farmer</strong>
+                  <span id="settings-contact-display" style="font-size:0.84rem;color:#64748b"></span>
                   <span class="verified-pill">✓ Verified Farmer</span>
                 </div>
               </div>
 
               <div class="form-field-group">
                 <label class="input-label-sm" data-i18n="full_name_lbl">FULL NAME</label>
-                <input type="text" id="set-farmer-name" class="mobile-input" value="santhosh" />
+                <input type="text" id="set-farmer-name" class="mobile-input" value="" placeholder="Enter your name" />
               </div>
               <div class="form-field-group">
                 <label class="input-label-sm" data-i18n="phone_lbl">MOBILE NUMBER</label>
-                <input type="tel" id="set-farmer-phone" class="mobile-input" value="+919994525549" />
+                <input type="tel" id="set-farmer-phone" class="mobile-input" value="" placeholder="+91 XXXXXXXXXX" />
               </div>
               <div class="form-field-group">
                 <label class="input-label-sm" data-i18n="email_lbl">EMAIL ADDRESS</label>
-                <input type="email" id="set-farmer-email" class="mobile-input" value="santhosh@vitstudent.ac.in" />
+                <input type="email" id="set-farmer-email" class="mobile-input" value="" placeholder="your@email.com" />
               </div>
               <button type="button" id="save-profile-btn" class="mobile-primary-btn" style="margin-top:12px" data-i18n="save_profile_btn">Save Profile Changes</button>
             </div>
@@ -685,6 +685,6 @@
     <!-- Scripts -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script>
-    <script src="/static/app.js?v=20260916-pwa-v2"></script>
+    <script src="/static/app.js?v=20260916-pwa-v3"></script>
   </body>
 </html>

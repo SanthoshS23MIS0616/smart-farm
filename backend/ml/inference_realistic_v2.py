@@ -1334,13 +1334,18 @@ class InferenceEngine:
             # Normalize prominence: max yield in our DB is 70t/ha (sugarcane), min 0.7
             prominence = float(np.clip((yield_avg - 0.7) / (70.0 - 0.7), 0.0, 1.0))
 
-            # ── Rebalanced final_score ─────────────────────────────────────────
-            # Raw ML prob  (0.20): actual model confidence, not relative
-            # Agronomic fit(0.15): soil+climate suitability, raw
-            # Profit       (0.25): relative profit among candidates
-            # Prominence   (0.10): historical crop significance
-            # Affordability(0.15): relative low-cost among candidates
-            # Safety       (0.15): relative safety among candidates
+            # ── Anti-repetition diversity jitter ──────────────────────────────
+            # Prevents a single low-yield pulse (e.g. Blackgram) from always
+            # dominating when ML probability is marginally highest.
+            # A small random noise breaks score ties and adds crop diversity.
+            import random as _rnd
+            diversity_jitter = _rnd.uniform(-0.015, 0.015)
+            # Extra dampening for very low yield crops (< 1.5 t/ha) to prevent
+            # them winning over staple crops with similar ml_prob scores.
+            yield_diversity_damp = 0.0
+            if yield_avg < 1.5 and raw_ml < 0.25:
+                yield_diversity_damp = -0.04  # small penalty for low-yield pulses
+
             item["final_score"] = float(
                 (raw_ml   * 0.20)
                 + (raw_ag * 0.15)
@@ -1348,6 +1353,8 @@ class InferenceEngine:
                 + (prominence * 0.10)
                 + (lc_sc  * 0.15)
                 + (saf_sc * 0.15)
+                + diversity_jitter
+                + yield_diversity_damp
             )
             item["high_investment_profit_score"] = float(
                 (p_sc    * 0.50)
